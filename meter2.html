@@ -86,6 +86,21 @@ h1{font-size:20px;margin:6px 4px 8px;font-weight:700}
   border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
 .tools button.alt{background:#fff;color:var(--ink);border:1px solid var(--ink)}
 .foot{margin:14px 4px 0;font-size:12px;color:var(--mute);text-align:center}
+.prow{text-align:center;margin-top:16px}
+.prow button{font:inherit;font-weight:700;padding:10px 20px;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
+@page{size:A4;margin:10mm}
+@media print{
+  html,body{background:#fff}
+  body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:none}
+  .prow,.foot,.tools{display:none}
+  h1{margin:0 4px 6px}
+  .panel{box-shadow:none;padding:12px 8px;break-inside:avoid}
+  .grid{gap:12px 14px}
+  .brk{min-height:46px}
+  .row{break-inside:avoid}
+  .main{margin-top:12px;break-inside:avoid}
+}
 </style>
 </head>
 <body>
@@ -180,10 +195,11 @@ function render(){
   const used = Object.keys(D.types).some(n => n <= D.count && toArr(D.types[n]).length);
   const legend = (EDIT || used) ? `<div class="legend">${Object.keys(TY).map(k => `<span>${icon(k)}${TY[k].n}</span>`).join('')}</div>` : '';
   app.innerHTML = tools + loc + `<div class="panel"><div class="grid">${g}</div>${legend}</div>` + mainCard() +
-    (EDIT ? '' : '<p class="foot">هذه الصفحة للعرض فقط</p>');
+    (EDIT ? '' : '<div class="prow"><button id="prt">طباعة هذه اللوحة</button></div><p class="foot">هذه الصفحة للعرض فقط</p>');
   scrollTo(0, y);
 }
 render();
+app.addEventListener('click', e => { if(e.target.id === 'prt') window.print(); });
 
 if(EDIT){
   app.addEventListener('input', e => {

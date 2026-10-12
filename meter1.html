@@ -47,8 +47,17 @@ h1{font-size:20px;margin:6px 4px 8px;font-weight:700}
 .bd{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;
   box-shadow:0 0 0 2px var(--panel),0 1px 3px rgba(0,0,0,.3)}
 .bd svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.bd.pos{position:absolute;top:-12px}
-.left .bd.pos{right:8px} .right .bd.pos{left:8px}
+.bds{position:absolute;top:-12px;display:flex;gap:4px}
+.left .bds{right:8px} .right .bds{left:8px}
+.brk.t::before{content:'';position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--g)}
+.txt{flex:1;min-width:0;direction:rtl;text-align:center}
+.pl{font-size:11px;font-weight:600;color:var(--mute);margin-bottom:2px}
+.ed .chips{display:flex;flex-wrap:wrap;gap:4px}
+.ed .chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:3px 7px 3px 5px;border:1px solid #b6bcc5;border-radius:12px;background:#fff;cursor:pointer}
+.ed .chip.on{background:#eef3fb;border-color:#6b7480}
+.ed .chip input{width:auto;display:inline-block;padding:0;margin:0}
+.chip .bd{width:18px;height:18px;box-shadow:none}
+.chip .bd svg{width:11px;height:11px}
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;margin-top:14px;font-size:12.5px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend .bd{width:20px;height:20px;box-shadow:none}
@@ -77,6 +86,21 @@ h1{font-size:20px;margin:6px 4px 8px;font-weight:700}
   border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
 .tools button.alt{background:#fff;color:var(--ink);border:1px solid var(--ink)}
 .foot{margin:14px 4px 0;font-size:12px;color:var(--mute);text-align:center}
+.prow{text-align:center;margin-top:16px}
+.prow button{font:inherit;font-weight:700;padding:10px 20px;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
+@page{size:A4;margin:10mm}
+@media print{
+  html,body{background:#fff}
+  body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:none}
+  .prow,.foot,.tools{display:none}
+  h1{margin:0 4px 6px}
+  .panel{box-shadow:none;padding:12px 8px;break-inside:avoid}
+  .grid{gap:12px 14px}
+  .brk{min-height:46px}
+  .row{break-inside:avoid}
+  .main{margin-top:12px;break-inside:avoid}
+}
 </style>
 </head>
 <body>
@@ -86,24 +110,28 @@ h1{font-size:20px;margin:6px 4px 8px;font-weight:700}
 </div>
 <script>
 // البيانات تُكتب هنا تلقائياً عند حفظ الملف من وضع الإعداد
-const DATA = /*N*/{"loc":"شقة سعد","count":18,"updated":"2026-10-09","names":{"1":"غرفة ريان وراكان","2":"الصاله","3":"sdf","4":"ggg"},"types":{"1":"light","2":"ac","6":"ac","7":"light"},"main":{"amp":"200A","poles":"3P","brand":"","model":"ALD","note":"عند الحريق أو الصعق افصل المفتاح الرئيسي أولاً"}}/*E*/;
+const DATA = /*N*/{"loc":"شقة سعد","count":18,"updated":"2026-10-12","names":{"1":"غرفة ريان وراكان","2":"الصاله","3":"sdf","4":"ggg"},"types":{"1":["light"],"2":["ac"],"6":["ac"],"7":["light"]},"places":{},"main":{"amp":"200A","poles":"3P","brand":"","model":"ALD","note":"عند الحريق أو الصعق افصل المفتاح الرئيسي أولاً"}}/*E*/;
 
 const EDIT = location.hash === '#edit';
-const KEY = 'panel-draft-v2';
+const KEY = 'panel-draft-v2:' + location.pathname;
 const TY = {
   light:{n:'إنارة', c:'#e0a000', p:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'},
   ac:{n:'مكيف', c:'#1892b8', p:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5"/>'},
   sock:{n:'مقابس', c:'#6b4fbb', p:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 10v2M15 10v2M9 16h6"/>'},
   heat:{n:'سخان', c:'#e4572e', p:'<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.5 1 2 1.5 2C10 8 11 5 12 3z"/>'}
 };
-let D = {loc:'', count:24, names:{}, types:{}, updated:'', main:{amp:'200A', poles:'3P', brand:'', model:'', note:''}};
+const PL = ['حمام','غرفة نوم','مطبخ','صالة','مجلس','غرفة غسيل','مستودع','مدخل','حوش','مشب','درج','سطح','أخرى'];
+const fresh = () => ({loc:'', count:24, names:{}, types:{}, places:{}, updated:'', main:{amp:'200A', poles:'3P', brand:'', model:'', note:''}});
+let D = fresh();
+const toArr = v => (Array.isArray(v) ? v : (v ? [v] : [])).filter(k => TY[k]);
 function merge(s){
   if(!s) return;
   if(typeof s.loc === 'string') D.loc = s.loc;
   if(s.count) D.count = s.count;
   if(s.updated) D.updated = s.updated;
   Object.assign(D.names, s.names || {});
-  Object.assign(D.types, s.types || {});
+  Object.assign(D.places, s.places || {});
+  for(const n in (s.types || {})) D.types[n] = toArr(s.types[n]);
   Object.assign(D.main, s.main || {});
 }
 merge(DATA);
@@ -119,17 +147,19 @@ function fmt(iso){
 
 function breaker(n, side){
   if(n > D.count) return `<div class="row ${side}"></div>`;
-  const t = TY[D.types[n]] ? D.types[n] : '', v = D.names[n] || '';
+  const ts = toArr(D.types[n]), v = D.names[n] || '', pl = D.places[n] || '', k = ts.length;
+  const g = k ? `--g:linear-gradient(90deg,${ts.map((t, i) => `${TY[t].c} ${i*100/k}% ${(i+1)*100/k}%`).join(',')})` : '';
   let body;
   if(EDIT){
-    const opts = '<option value="">بدون تصنيف</option>' + Object.keys(TY).map(k => `<option value="${k}"${k === t ? ' selected' : ''}>${TY[k].n}</option>`).join('');
-    body = `<div class="ed"><input data-n="${n}" value="${esc(v)}" placeholder="اكتب المكان" maxlength="60"><select data-t="${n}" aria-label="نوع المفتاح ${n}">${opts}</select></div>`;
+    const po = '<option value="">نوع المكان</option>' + PL.map(x => `<option${x === pl ? ' selected' : ''}>${x}</option>`).join('');
+    const ch = Object.keys(TY).map(t => `<label class="chip${ts.includes(t) ? ' on' : ''}"><input type="checkbox" data-t="${n}" value="${t}"${ts.includes(t) ? ' checked' : ''}>${icon(t)}${TY[t].n}</label>`).join('');
+    body = `<div class="ed"><select data-p="${n}" aria-label="نوع المكان ${n}">${po}</select><input data-n="${n}" value="${esc(v)}" placeholder="اسم المكان" maxlength="60"><div class="chips">${ch}</div></div>`;
   }else{
-    body = `<div class="name${v ? '' : ' empty'}">${v ? esc(v) : 'غير مسمّى'}</div>`;
+    body = `<div class="txt">${pl ? `<div class="pl">${esc(pl)}</div>` : ''}${(v || !pl) ? `<div class="name${v ? '' : ' empty'}">${v ? esc(v) : 'غير مسمّى'}</div>` : ''}</div>`;
   }
   const c = ((n - 1) >> 1) % 3;
   return `<div class="row ${side}"><div class="tag"><div class="strip c${c}"></div><div class="num">${n}</div></div>
-    <div class="brk"${t ? ` style="border-top:3px solid ${TY[t].c}"` : ''}>${t ? icon(t, 'pos') : ''}<div class="sw"><i></i></div>${body}</div></div>`;
+    <div class="brk${k ? ' t' : ''}"${g ? ` style="${g}"` : ''}>${k ? `<div class="bds">${ts.map(t => icon(t)).join('')}</div>` : ''}<div class="sw"><i></i></div>${body}</div></div>`;
 }
 
 function mainCard(){
@@ -161,42 +191,61 @@ function render(){
     : (D.loc ? `<p class="loc"><span>موقع العداد</span>${esc(D.loc)}</p>` : '');
   const tools = EDIT ? `<div class="tools">وضع الإعداد: عدد المفاتيح الآن <b>${D.count}</b><br>
     <button id="add">+ إضافة مفتاح</button><button id="del" class="alt">− حذف آخر مفتاح</button>
-    <button id="save">تنزيل الملف النهائي</button></div>` : '';
-  const used = Object.keys(D.types).some(n => n <= D.count && TY[D.types[n]]);
+    <button id="imp" class="alt">استيراد بيانات من ملف سابق</button><button id="save">تنزيل الملف النهائي</button><input type="file" id="impf" accept=".html,.htm" hidden></div>` : '';
+  const used = Object.keys(D.types).some(n => n <= D.count && toArr(D.types[n]).length);
   const legend = (EDIT || used) ? `<div class="legend">${Object.keys(TY).map(k => `<span>${icon(k)}${TY[k].n}</span>`).join('')}</div>` : '';
   app.innerHTML = tools + loc + `<div class="panel"><div class="grid">${g}</div>${legend}</div>` + mainCard() +
-    (EDIT ? '' : '<p class="foot">هذه الصفحة للعرض فقط</p>');
+    (EDIT ? '' : '<div class="prow"><button id="prt">طباعة هذه اللوحة</button></div><p class="foot">هذه الصفحة للعرض فقط</p>');
   scrollTo(0, y);
 }
 render();
+app.addEventListener('click', e => { if(e.target.id === 'prt') window.print(); });
 
 if(EDIT){
   app.addEventListener('input', e => {
     const t = e.target;
-    if(t.tagName === 'SELECT') return;
+    if(t.tagName === 'SELECT' || t.type === 'checkbox' || t.type === 'file') return;
     if(t.dataset.n) D.names[t.dataset.n] = t.value;
     else if('loc' in t.dataset) D.loc = t.value;
     else if(t.dataset.m) D.main[t.dataset.m] = t.value;
     persist();
   });
   app.addEventListener('change', e => {
-    const t = e.target;
-    if(t.dataset.t){ D.types[t.dataset.t] = t.value; persist(); render(); }
+    const t = e.target, d = t.dataset;
+    if(d.t){ D.types[d.t] = [...app.querySelectorAll('input[data-t="' + d.t + '"]:checked')].map(i => i.value); persist(); render(); }
+    else if(d.p){ D.places[d.p] = t.value; persist(); render(); }
+    else if(t.id === 'impf' && t.files[0]) importFile(t.files[0]);
   });
   app.addEventListener('click', e => {
     const id = e.target.id;
     if(id === 'add' && D.count < 60){ D.count++; persist(); render(); }
     else if(id === 'del' && D.count > 1){ D.count--; persist(); render(); }
+    else if(id === 'imp') document.getElementById('impf').click();
     else if(id === 'save') exportFile();
   });
 }
 
+function importFile(f){
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const m = /\/\*N\*\/([\s\S]*?)\/\*E\*\//.exec(r.result);
+      if(!m) throw 0;
+      const o = JSON.parse(m[1]);
+      D = fresh(); merge(o); persist(); render();
+      alert('تم استيراد البيانات. راجعها ثم اضغط تنزيل الملف النهائي.');
+    }catch(x){ alert('لم أجد بيانات في هذا الملف. اختر ملفاً سبق تنزيله من وضع الإعداد.'); }
+  };
+  r.readAsText(f);
+}
+
 function exportFile(){
   const d = new Date(), p = x => String(x).padStart(2, '0');
-  const out = {loc:D.loc.trim(), count:D.count, updated:d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()), names:{}, types:{}, main:{}};
+  const out = {loc:D.loc.trim(), count:D.count, updated:d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()), names:{}, types:{}, places:{}, main:{}};
   for(let n = 1; n <= D.count; n++){
     const v = (D.names[n] || '').trim(); if(v) out.names[n] = v;
-    if(TY[D.types[n]]) out.types[n] = D.types[n];
+    const ts = toArr(D.types[n]); if(ts.length) out.types[n] = ts;
+    if(D.places[n]) out.places[n] = D.places[n];
   }
   for(const k in D.main) out.main[k] = String(D.main[k]).trim();
   const c = document.documentElement.cloneNode(true);
@@ -206,7 +255,9 @@ function exportFile(){
   s.textContent = s.textContent.replace(/\/\*N\*\/[\s\S]*?\/\*E\*\//, () => '/*N*/' + json + '/*E*/');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['<!DOCTYPE html>\n' + c.outerHTML], {type:'text/html'}));
-  a.download = 'index.html';
+  let fn = decodeURIComponent(location.pathname.split('/').pop() || '');
+  if(!/\.html?$/i.test(fn)) fn = 'index.html';
+  a.download = fn;
   a.click();
 }
 </script>
