@@ -40,7 +40,7 @@ h1{font-size:20px;margin:6px 4px 8px;font-weight:700}
 .sw i{display:block;width:14px;height:17px;background:var(--toggle);border-radius:2px}
 .name{flex:1;min-width:0;direction:rtl;text-align:center;font-size:13.5px;font-weight:600;
   line-height:1.35;overflow-wrap:anywhere}
-.name.empty{color:#8b929c;font-weight:400}
+.name.empty{color:#d62828;font-weight:700;font-size:13.5px}
 .ed{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .ed input{font-weight:600;padding:6px 4px}
 .ed select{font-size:12px;padding:4px}
@@ -118,9 +118,11 @@ const TY = {
   light:{n:'إنارة', c:'#e0a000', p:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'},
   ac:{n:'مكيف', c:'#1892b8', p:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5"/>'},
   sock:{n:'مقابس', c:'#6b4fbb', p:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 10v2M15 10v2M9 16h6"/>'},
-  heat:{n:'سخان', c:'#e4572e', p:'<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.5 1 2 1.5 2C10 8 11 5 12 3z"/>'}
+  heat:{n:'سخان', c:'#e4572e', p:'<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.5 1 2 1.5 2C10 8 11 5 12 3z"/>'},
+  pump:{n:'مضخة', c:'#0a8f6a', p:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9 15a3 3 0 0 0 3 3"/>'},
+  modem:{n:'مودم', c:'#c2255c', p:'<rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 16.5h.01M11 16.5h.01M7 13V6M17 13V6"/>'}
 };
-const PL = ['حمام','غرفة نوم','مطبخ','صالة','مجلس','غرفة غسيل','مستودع','مدخل','حوش','مشب','درج','سطح','أخرى'];
+const PL = ['حمام','حمام + صالة','غرفة','غرفة نوم','مطبخ','صالة','مجلس','غرفة غسيل','مستودع','مدخل','حوش','مدخل حوش','مشب','درج','سطح','أخرى'];
 const fresh = () => ({loc:'', count:24, names:{}, types:{}, places:{}, updated:'', main:{amp:'200A', poles:'3P', brand:'', model:'', note:''}});
 let D = fresh();
 const toArr = v => (Array.isArray(v) ? v : (v ? [v] : [])).filter(k => TY[k]);
@@ -263,4 +265,4 @@ function exportFile(){
 </script>
 
 
-<div id="alireviews-ext-root"></div></body></html>
+</body></html>
